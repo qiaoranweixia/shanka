@@ -33,13 +33,13 @@
         .xp-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #ec4899); width: 0%; transition: width 0.5s ease; }
         .xp-text { font-size: 0.7rem; color: var(--text-sub); margin-top: 2px; display: flex; justify-content: space-between; }
 
-        /* Main Layout */
+        /* Main */
         .main-content { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         .view-section { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; }
         .view-section.active { display: flex; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Flashcard Mode */
+        /* Flashcard */
         .flashcard-container { flex: 1; perspective: 1500px; width: 100%; margin-bottom: 15px; position: relative; min-height: 300px; display: flex; flex-direction: column; justify-content: center;}
         .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); border-radius: 20px; box-shadow: var(--shadow); background: var(--card-bg); }
         .flashcard.flipped { transform: rotateY(180deg); }
@@ -51,7 +51,7 @@
         .card-text strong { color: var(--primary); }
         .text-long { font-size: 1.2rem; text-align: left; }
 
-        /* Quiz Mode */
+        /* Quiz UI */
         .quiz-container { display: none; flex-direction: column; height: 100%; padding-bottom: 10px; }
         .quiz-container.active { display: flex; }
         .quiz-question-box { flex: 1; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); text-align: center; }
@@ -81,8 +81,6 @@
         .item-content { flex: 1; overflow: hidden; }
         .item-meta { font-size: 0.75rem; color: #9ca3af; display: flex; gap: 10px; margin-top: 5px; }
         .item-actions { display: flex; gap: 10px; margin-left: 10px; }
-        
-        /* Switches */
         .switch-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .switch-container:last-child { border-bottom: none; }
         .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
@@ -92,19 +90,15 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        /* Navigation & Fab */
+        /* Nav & Fab */
         .nav-bar { height: var(--nav-height); background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.7rem; gap: 4px; padding: 8px 0; width: 100%; }
         .nav-item.active { color: var(--primary); }
         .fab { position: fixed; bottom: calc(var(--nav-height) + 20px); right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); z-index: 40; }
-        
-        /* Modal & Input */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
         .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; animation: popIn 0.3s; color: var(--text-main); }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; display:block; background: var(--bg-color); color: var(--text-main); }
-        
-        /* Utils */
         .toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 24px; border-radius: 30px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; font-weight: bold; white-space: nowrap; }
         .toast.show { opacity: 1; }
         .combo-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%) scale(0); font-size: 3rem; font-weight: 900; color: var(--warning); text-shadow: 0 2px 0 #fff, 0 5px 10px rgba(0,0,0,0.2); pointer-events: none; z-index: 50; transition: all 0.3s; opacity: 0; }
@@ -130,12 +124,11 @@
         <!-- 1. Home View -->
         <div id="view-home" class="view-section active">
             <div class="combo-text" id="comboText">COMBO!</div>
-            <!-- 到期横幅 -->
             <div id="reviewBanner" style="background:#fef3c7; color:#d97706; padding:10px; border-radius:10px; margin-bottom:10px; text-align:center; font-size:0.9rem; display:none;" onclick="startReview()">
                 🔔 有 <span id="dueCount">0</span> 个到期！点击复习
             </div>
             
-            <!-- 抽认卡模式 UI -->
+            <!-- Standard Card Mode -->
             <div class="flashcard-container" id="cardModeUI">
                 <div class="flashcard">
                     <div class="card-face card-front" onclick="flipCard()">
@@ -158,7 +151,7 @@
                 </div>
             </div>
 
-            <!-- 测验模式 UI -->
+            <!-- Quiz Mode -->
             <div class="quiz-container" id="quizModeUI">
                 <div class="quiz-question-box">
                     <div id="quizQuestion" class="card-text">Question</div>
@@ -166,20 +159,16 @@
                 <div class="quiz-options-grid" id="quizOptions"></div>
             </div>
 
-            <!-- 底部控制区 -->
             <div class="controls-area">
                 <div class="controls">
-                    <!-- 模式切换 -->
                     <button class="btn-mode-toggle" id="modeToggleBtn" onclick="toggleQuizMode()">
                         <i class="fas fa-gamepad"></i>
                     </button>
-                    <!-- 标准评分按钮 -->
                     <div id="stdControls" style="display:flex; flex:1; gap:10px;">
                         <button class="btn-action btn-fail" onclick="handleResult(0)"><i class="fas fa-times fa-lg"></i><span>忘记</span></button>
                         <button class="btn-action btn-hard" onclick="handleResult(3)"><i class="fas fa-question fa-lg"></i><span>模糊</span></button>
                         <button class="btn-action btn-pass" onclick="handleResult(5)"><i class="fas fa-check fa-lg"></i><span>秒杀</span></button>
                     </div>
-                    <!-- 测验模式提示 -->
                     <div id="quizControls" style="display:none; flex:1; align-items:center; justify-content:center; color:var(--text-sub); font-size:0.9rem;">
                         选择正确答案
                     </div>
@@ -216,7 +205,7 @@
                 </div>
             </div>
 
-            <!-- File Management -->
+            <!-- Files -->
             <div style="background:var(--card-bg); border-radius:12px; padding:15px; border:1px solid var(--border); margin-bottom:15px;">
                 <h3 style="font-size:1rem; margin-bottom:10px;">文件管理</h3>
                 <div style="position:relative; margin-bottom:10px;">
@@ -225,7 +214,7 @@
                 </div>
                 <button class="input-field" onclick="exportData()" style="background:var(--bg-color); text-align:center;"><i class="fas fa-file-download"></i> 导出备份</button>
                 <div style="font-size:0.75rem; color:var(--text-sub); margin-top:5px;">
-                    * 注意：自动读取同目录 c.txt 仅在服务器环境（GitHub/Cloudflare）有效，本地双击无效。
+                    * 提示：服务器上会自动读取同级 c.txt。本地请手动导入。
                 </div>
             </div>
 
@@ -233,7 +222,7 @@
             <div style="background:var(--card-bg); border-radius:12px; padding:15px; margin-bottom:15px; border:1px solid var(--border);">
                 <h3 style="font-size:1rem; margin-bottom:10px;"><i class="fab fa-github"></i> GitHub 同步</h3>
                 <input type="password" id="ghTokenInput" class="input-field" placeholder="GitHub Token" onchange="saveSettings()">
-                <input type="text" id="gistIdInput" class="input-field" placeholder="Gist ID (自动生成)" onchange="saveSettings()">
+                <input type="text" id="gistIdInput" class="input-field" placeholder="Gist ID" onchange="saveSettings()">
                 <div style="display:flex; gap:10px;">
                     <button class="input-field" onclick="syncToCloud()" style="background:var(--primary); color:white; border:none;">上传</button>
                     <button class="input-field" onclick="syncFromCloud()" style="background:var(--bg-color);">下载</button>
@@ -249,20 +238,14 @@
         </div>
     </div>
 
-    <!-- Floating Action Button -->
     <div class="fab" onclick="openAddModal()"><i class="fas fa-plus"></i></div>
-    
-    <!-- Navigation -->
     <div class="nav-bar">
         <div class="nav-item active" onclick="switchView('home', this)"><i class="fas fa-layer-group"></i><span>学习</span></div>
         <div class="nav-item" onclick="switchView('list', this)"><i class="fas fa-list"></i><span>单词本</span></div>
         <div class="nav-item" onclick="switchView('settings', this)"><i class="fas fa-cog"></i><span>设置</span></div>
     </div>
 
-    <!-- Add/Edit Modal -->
     <div class="modal" id="editModal"><div class="modal-content"><h3>卡片</h3><input type="hidden" id="editIndex"><textarea id="inputFront" class="input-field" rows="3" placeholder="正面 (**加粗**, 图片URL)"></textarea><textarea id="inputBack" class="input-field" rows="3" placeholder="背面"></textarea><div style="display:flex;justify-content:flex-end;gap:10px;"><button class="input-field" style="width:auto;" onclick="closeModal()">取消</button><button class="input-field" style="width:auto;background:var(--primary);color:white;" onclick="saveCard()">保存</button></div></div></div>
-    
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
@@ -279,18 +262,17 @@
                 isQuiz: false, quizAnswerIdx: -1
             }
         };
+        const XP_TABLE = [0,100,300,600,1000,1500,2200,3000,4000];
         
         let lastReminderTime = 0;
         let audioCtx = null;
 
-        /* === Audio Init (Lazy) === */
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
         document.addEventListener('click', initAudio, {once:true});
 
-        /* === Lifecycle === */
         window.onload = () => {
             loadData();
             toggleDarkMode(App.state.isDark);
@@ -299,22 +281,21 @@
             
             if("Notification" in window && Notification.permission!=="granted") Notification.requestPermission();
             
-            tryAutoLoadTxt(); // 尝试自动读取同目录 c.txt
+            tryAutoLoadTxt(); 
             checkDailyStreak(); renderStats(); updateList();
             
             document.getElementById('ghTokenInput').value = App.state.ghToken;
             document.getElementById('gistIdInput').value = App.state.gistId;
             document.getElementById('apiKeyInput').value = App.state.apiKey;
 
-            if(App.data.words.length===0) App.data.words.push({front:"Welcome",back:"请导入数据",nextReview:0,interval:0,repetitions:0,easeFactor:2.5});
+            if(App.data.words.length===0) App.data.words.push({front:"Welcome",back:"答案在此",nextReview:0,interval:0,repetitions:0,easeFactor:2.5});
             startPractice();
-            setInterval(checkDue, 60000); // 每分钟检查到期
+            setInterval(checkDue, 60000);
         };
 
-        /* === Sound & TTS === */
+        /* === Sound === */
         function toggleMuteMode(isMuted) {
-            App.state.isMuted = isMuted;
-            localStorage.setItem('mem_muted', isMuted);
+            App.state.isMuted = isMuted; localStorage.setItem('mem_muted', isMuted);
             if(isMuted && audioCtx) audioCtx.suspend();
             if(!isMuted && audioCtx) audioCtx.resume();
         }
@@ -322,43 +303,26 @@
         function playSound(type) {
             if (App.state.isMuted) return;
             initAudio(); if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            osc.connect(g); g.connect(audioCtx.destination);
+            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain(); osc.connect(g); g.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
-
-            if(type === 'success') {
-                osc.type = 'sine'; osc.frequency.value = 600;
-                g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'fail') {
-                osc.type = 'sawtooth'; osc.frequency.value = 150;
-                g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            } else if (type === 'reminder') {
-                // Ding Ding
-                osc.frequency.setValueAtTime(800, now); osc.frequency.setValueAtTime(1200, now + 0.1);
-                g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4);
-            }
+            if(type === 'success') { osc.type = 'sine'; osc.frequency.value = 600; g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.2); osc.start(now); osc.stop(now + 0.2); }
+            else if (type === 'fail') { osc.type = 'sawtooth'; osc.frequency.value = 150; g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3); osc.start(now); osc.stop(now + 0.3); }
+            else if (type === 'reminder') { osc.frequency.setValueAtTime(800, now); osc.frequency.setValueAtTime(1200, now + 0.1); g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.4); osc.start(now); osc.stop(now + 0.4); }
         }
 
         function speak(e, s) {
-            e.stopPropagation();
-            if (App.state.isMuted) return;
+            e.stopPropagation(); if (App.state.isMuted) return;
             const txt = document.getElementById(s==='front'?'cardFront':'cardBack').innerText;
             speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
         }
 
-        /* === Quiz Logic === */
+        /* === Quiz Mode === */
         function toggleQuizMode() {
             if(App.data.words.length < 4) return showToast("需至少4个单词");
             App.state.isQuiz = !App.state.isQuiz;
             const btn = document.getElementById('modeToggleBtn');
-            const cardUI = document.getElementById('cardModeUI');
-            const quizUI = document.getElementById('quizModeUI');
-            const stdCtrls = document.getElementById('stdControls');
-            const quizCtrls = document.getElementById('quizControls');
+            const cardUI = document.getElementById('cardModeUI'); const quizUI = document.getElementById('quizModeUI');
+            const stdCtrls = document.getElementById('stdControls'); const quizCtrls = document.getElementById('quizControls');
             if(App.state.isQuiz) {
                 btn.classList.add('active'); cardUI.style.display='none'; quizUI.style.display='flex'; stdCtrls.style.display='none'; quizCtrls.style.display='flex';
                 renderQuiz(); showToast("🎮 测验模式");
@@ -399,40 +363,31 @@
             }
         }
 
-        /* === Core / SM-2 / File Logic === */
+        /* === Core Logic === */
         function toggleDarkMode(isDark) { App.state.isDark=isDark; localStorage.setItem('mem_dark',isDark); if(isDark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme'); }
         function parseContent(t) { if(!t)return''; let h=t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); h=h.replace(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/gi,'<img src="$1" />'); return h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'); }
         
-        // 核心文件解析逻辑：返回 {added, total}
         function parseAndMergeTxt(t) { 
-            const l=t.split(/\r?\n/); let added=0, total=0; 
+            const l=t.split(/\r?\n/); let c=0, tot=0; 
             l.forEach(x=>{
                 if(!x.trim())return; 
-                // 兼容 Tab 和 逗号
                 let p=x.split('\t'); if(p.length<2) p=x.split(/,|，/);
                 const f=p[0].trim(); const b=p[1]?p[1].trim():'';
-                if(f){
-                    total++;
-                    if(!App.data.words.some(w=>w.front===f)){
-                        App.data.words.push({front:f,back:b,nextReview:0,interval:0,repetitions:0,easeFactor:2.5,aiNote:''});
-                        added++;
-                    }
-                }
+                if(f){ tot++; if(!App.data.words.some(w=>w.front===f)){ App.data.words.push({front:f,back:b,nextReview:0,interval:0,repetitions:0,easeFactor:2.5,aiNote:''}); c++; }}
             }); 
-            return {added, total}; 
+            return {added:c, total:tot}; 
         }
 
-        // 自动读取 (服务器环境)
         async function tryAutoLoadTxt() { 
-            if(window.location.protocol === 'file:') return console.log("本地文件协议，跳过自动读取");
+            if(window.location.protocol === 'file:') return console.log("Local mode: skip auto-load");
             try{
-                const r=await fetch('c.txt?t='+Date.now()); // 强制刷新缓存
+                const r=await fetch('c.txt?t='+Date.now()); 
                 if(r.ok){
-                    const res = parseAndMergeTxt(await r.text());
-                    if(res.added > 0){ showToast(`📄 自动更新: +${res.added} 词`); saveData(); updateList(); }
-                    else console.log(`c.txt 读取成功，无新词 (共${res.total}词)`);
+                    const res=parseAndMergeTxt(await r.text());
+                    if(res.added>0){showToast(`自动导入 +${res.added}`); saveData(); updateList();}
+                    else console.log(`c.txt checked: ${res.total} items, 0 new.`);
                 }
-            }catch(e){ console.log("c.txt 读取失败或不存在"); } 
+            }catch(e){} 
         }
 
         function handleResult(q, skipRender=false) {
@@ -477,10 +432,7 @@
             const b=document.getElementById('reviewBanner');
             if(c>0){
                 b.style.display='block'; document.getElementById('dueCount').textContent=c;
-                // 提示音逻辑：非静音模式 && 间隔>10分钟
-                if(!App.state.isMuted && (Date.now() - lastReminderTime > 600000)) { 
-                    playSound('reminder'); lastReminderTime = Date.now(); 
-                }
+                if(!App.state.isMuted && (Date.now() - lastReminderTime > 600000)) { playSound('reminder'); lastReminderTime = Date.now(); }
             } else b.style.display='none';
         }
 
@@ -489,10 +441,7 @@
         function triggerCombo(){ App.state.combo++; if(App.state.combo>1){const e=document.getElementById('comboText');e.textContent=`COMBO x${App.state.combo}`;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),800);} }
         function checkDailyStreak(){ const t=new Date().toISOString().split('T')[0]; if(App.data.user.lastLogin!==t){ const y=new Date(Date.now()-86400000).toISOString().split('T')[0]; App.data.user.streak=(App.data.user.lastLogin===y)?App.data.user.streak+1:1; App.data.user.lastLogin=t; saveData(); } }
         function renderStats(){ const t=new Date().toISOString().split('T')[0]; document.getElementById('userLevel').textContent=App.data.user.level; document.getElementById('userStreak').textContent=App.data.user.streak; document.getElementById('currentXP').textContent=App.data.user.xp; document.getElementById('todayCount').textContent=App.data.user.history[t]||0; const next=XP_TABLE[App.data.user.level]||App.data.user.level*1000; document.getElementById('nextLevelXP').textContent=next; document.getElementById('xpBar').style.width=((App.data.user.xp/next)*100)+'%'; checkDue(); }
-        
-        // 手动导入
         function importData(el){ const f=el.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{if(f.name.endsWith('.json')){try{App.data=JSON.parse(e.target.result);saveData();location.reload();}catch(e){showToast("Err");}}else{const res=parseAndMergeTxt(e.target.result);if(res.added>0){showToast(`+${res.added}`);saveData();updateList();renderCard();}else showToast("无新词");}}; r.readAsText(f); el.value=''; }
-        
         function updateList(f=''){ const c=document.getElementById('wordListContainer'); c.innerHTML=''; App.data.words.forEach((w,i)=>{ if(f&&!w.front.includes(f))return; const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div class="item-content" onclick="jump(${i})"><div class="item-front">${parseContent(w.front)}</div><div style="color:var(--text-sub);font-size:0.8rem">${parseContent(w.back)}</div></div><div class="item-actions"><i class="fas fa-trash" style="color:red" onclick="del(${i})"></i></div>`; c.appendChild(d); }); }
         function jump(i){ App.state.currentIdx=i; App.state.mode='practice'; switchView('home',document.querySelector('.nav-item')); App.state.isQuiz?renderQuiz():renderCard(); }
         function del(i){ if(confirm('Del?')){App.data.words.splice(i,1);saveData();updateList();renderCard();} }
