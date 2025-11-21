@@ -5,30 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f3f4f6">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MemoryPro | 纯净版</title>
-
+    <title>MemoryPro | 增强版</title>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
+    
     <style>
         :root {
             --primary: #6366f1; --primary-dark: #4f46e5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
             --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937; --text-sub: #6b7280; --border: #e5e7eb;
             --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); --nav-height: 60px;
         }
+        [data-theme="dark"] {
+            --bg-color: #111827; --card-bg: #1f2937; --text-main: #f9fafb; --text-sub: #9ca3af; --border: #374151;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
 
         /* Header */
         .game-header { background: var(--card-bg); padding: 10px 15px; padding-top: max(10px, env(safe-area-inset-top)); box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 20; }
         .user-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .level-badge { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 4px 12px; border-radius: 15px; font-weight: 800; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3); display: flex; align-items: center; gap: 5px; }
         .streak-badge { color: #f59e0b; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        .xp-container { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; position: relative; }
+        .xp-container { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
         .xp-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #ec4899); width: 0%; transition: width 0.5s ease; }
         .xp-text { font-size: 0.7rem; color: var(--text-sub); margin-top: 2px; display: flex; justify-content: space-between; }
 
-        /* Main Layout */
+        /* Main */
         .main-content { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         .view-section { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; }
         .view-section.active { display: flex; animation: fadeIn 0.3s; }
@@ -41,37 +46,62 @@
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
         .card-back { transform: rotateY(180deg); background: linear-gradient(160deg, var(--card-bg) 70%, rgba(99, 102, 241, 0.1)); }
         .card-scroll { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .card-text { font-size: 2rem; font-weight: 700; color: var(--text-main); word-wrap: break-word; }
+        .card-text { font-size: 2rem; font-weight: 700; color: var(--text-main); word-wrap: break-word; max-width: 100%; }
+        .card-text img { max-width: 100%; max-height: 200px; border-radius: 10px; margin: 10px 0; border: 1px solid var(--border); }
+        .card-text strong { color: var(--primary); }
         .text-long { font-size: 1.2rem; text-align: left; }
+
+        /* Quiz UI */
+        .quiz-container { display: none; flex-direction: column; height: 100%; padding-bottom: 10px; }
+        .quiz-container.active { display: flex; }
+        .quiz-question-box { flex: 1; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); text-align: center; }
+        .quiz-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 40%; min-height: 200px; }
+        .quiz-btn { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); font-size: 0.95rem; font-weight: 500; cursor: pointer; padding: 10px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .quiz-btn:active { transform: scale(0.98); }
+        .quiz-btn.correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        .quiz-btn.wrong { background: var(--danger) !important; color: white !important; border-color: var(--danger) !important; opacity: 0.6; }
+        .quiz-btn.disabled { pointer-events: none; }
 
         /* Controls */
         .controls-area { margin-top: auto; margin-bottom: 20px; }
-        .controls { display: flex; gap: 10px; }
+        .controls { display: flex; gap: 10px; align-items: center; }
         .btn-action { flex: 1; padding: 15px 5px; border-radius: 16px; border: none; font-size: 0.9rem; font-weight: 700; color: white; cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
         .btn-action:active { transform: scale(0.96); }
         .btn-fail { background: var(--danger); } .btn-hard { background: var(--warning); } .btn-pass { background: var(--success); }
+        .btn-mode-toggle { width: 50px; height: 50px; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-sub); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .btn-mode-toggle.active { background: var(--primary); color: white; border: none; }
 
-        /* List & Settings */
+        /* Settings & List */
         .search-box { margin-bottom: 15px; position: relative; }
-        .search-input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: white; }
+        .search-input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); }
         .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub); }
         .word-list { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-        .list-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .list-item { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .item-content { flex: 1; overflow: hidden; }
         .item-meta { font-size: 0.75rem; color: #9ca3af; display: flex; gap: 10px; margin-top: 5px; }
         .item-actions { display: flex; gap: 10px; margin-left: 10px; }
+        
+        /* Switches */
+        .switch-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .switch-container:last-child { border-bottom: none; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
-        /* Navigation */
-        .nav-bar { height: var(--nav-height); background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
+        /* Nav & Fab */
+        .nav-bar { height: var(--nav-height); background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.7rem; gap: 4px; padding: 8px 0; width: 100%; }
         .nav-item.active { color: var(--primary); }
         .fab { position: fixed; bottom: calc(var(--nav-height) + 20px); right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); z-index: 40; }
-
-        /* UI Components */
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-        .modal-content { background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; animation: popIn 0.3s; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; animation: popIn 0.3s; color: var(--text-main); }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; display:block; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; display:block; background: var(--bg-color); color: var(--text-main); }
+        
         .toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 24px; border-radius: 30px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; font-weight: bold; white-space: nowrap; }
         .toast.show { opacity: 1; }
         .combo-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%) scale(0); font-size: 3rem; font-weight: 900; color: var(--warning); text-shadow: 0 2px 0 #fff, 0 5px 10px rgba(0,0,0,0.2); pointer-events: none; z-index: 50; transition: all 0.3s; opacity: 0; }
@@ -100,8 +130,8 @@
             <div id="reviewBanner" style="background:#fef3c7; color:#d97706; padding:10px; border-radius:10px; margin-bottom:10px; text-align:center; font-size:0.9rem; display:none;" onclick="startReview()">
                 🔔 有 <span id="dueCount">0</span> 个到期！点击复习
             </div>
-
-            <div class="flashcard-container">
+            
+            <div class="flashcard-container" id="cardModeUI">
                 <div class="flashcard">
                     <div class="card-face card-front" onclick="flipCard()">
                         <div class="card-scroll">
@@ -123,11 +153,26 @@
                 </div>
             </div>
 
+            <div class="quiz-container" id="quizModeUI">
+                <div class="quiz-question-box">
+                    <div id="quizQuestion" class="card-text">Question</div>
+                </div>
+                <div class="quiz-options-grid" id="quizOptions"></div>
+            </div>
+
             <div class="controls-area">
                 <div class="controls">
-                    <button class="btn-action btn-fail" onclick="handleResult(0)"><i class="fas fa-times fa-lg"></i><span>忘记</span></button>
-                    <button class="btn-action btn-hard" onclick="handleResult(3)"><i class="fas fa-question fa-lg"></i><span>模糊</span></button>
-                    <button class="btn-action btn-pass" onclick="handleResult(5)"><i class="fas fa-check fa-lg"></i><span>秒杀</span></button>
+                    <button class="btn-mode-toggle" id="modeToggleBtn" onclick="toggleQuizMode()">
+                        <i class="fas fa-gamepad"></i>
+                    </button>
+                    <div id="stdControls" style="display:flex; flex:1; gap:10px;">
+                        <button class="btn-action btn-fail" onclick="handleResult(0)"><i class="fas fa-times fa-lg"></i><span>忘记</span></button>
+                        <button class="btn-action btn-hard" onclick="handleResult(3)"><i class="fas fa-question fa-lg"></i><span>模糊</span></button>
+                        <button class="btn-action btn-pass" onclick="handleResult(5)"><i class="fas fa-check fa-lg"></i><span>秒杀</span></button>
+                    </div>
+                    <div id="quizControls" style="display:none; flex:1; align-items:center; justify-content:center; color:var(--text-sub); font-size:0.9rem;">
+                        请选择上方正确答案
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,39 +185,53 @@
 
         <!-- 3. Settings View -->
         <div id="view-settings" class="view-section">
-            <h2 style="margin-bottom:20px;">设置 & 数据</h2>
+            <h2 style="margin-bottom:20px;">设置</h2>
 
-            <!-- Local File Import -->
-            <div style="background:white; border-radius:12px; padding:15px; border:1px solid var(--border); margin-bottom:15px;">
-                <h3 style="font-size:1rem; margin-bottom:10px;">文件管理</h3>
-                <div style="position:relative; margin-bottom:10px;">
-                    <button class="input-field" style="background:var(--bg-color); text-align:center;"><i class="fas fa-file-upload"></i> 导入本地文件 (txt/json)</button>
-                    <input type="file" onchange="importData(this)" class="input-field" accept=".txt,.json" style="position:absolute; top:0; left:0; opacity:0; width:100%; height:100%; cursor:pointer;">
+            <!-- Preferences -->
+            <div style="background:var(--card-bg); border-radius:12px; padding:15px; border:1px solid var(--border); margin-bottom:15px;">
+                <h3 style="font-size:1rem; margin-bottom:5px;">偏好</h3>
+                <div class="switch-container">
+                    <span>🌙 深色模式</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <button class="input-field" onclick="exportData()" style="background:var(--bg-color); text-align:center;"><i class="fas fa-file-download"></i> 导出备份</button>
-                <div style="font-size:0.8rem; color:var(--text-sub); margin-top:5px;">
-                    * 若部署在服务器，启动时会自动读取同级 c.txt
+                <div class="switch-container">
+                    <span>🔕 禁止所有声音</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="muteModeToggle" onchange="toggleMuteMode(this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
+            <!-- Local File -->
+            <div style="background:var(--card-bg); border-radius:12px; padding:15px; border:1px solid var(--border); margin-bottom:15px;">
+                <h3 style="font-size:1rem; margin-bottom:10px;">文件管理</h3>
+                <div style="position:relative; margin-bottom:10px;">
+                    <button class="input-field" style="background:var(--bg-color); text-align:center;"><i class="fas fa-file-upload"></i> 导入 (txt/json)</button>
+                    <input type="file" onchange="importData(this)" class="input-field" accept=".txt,.json" style="position:absolute; top:0; left:0; opacity:0; width:100%; height:100%; cursor:pointer;">
+                </div>
+                <button class="input-field" onclick="exportData()" style="background:var(--bg-color); text-align:center;"><i class="fas fa-file-download"></i> 导出备份</button>
+            </div>
+
             <!-- GitHub Sync -->
-            <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; border:1px solid var(--border);">
-                <h3 style="font-size:1rem; margin-bottom:10px; display:flex; align-items:center;">
-                    <i class="fab fa-github" style="margin-right:8px;"></i> GitHub 云同步
-                </h3>
+            <div style="background:var(--card-bg); border-radius:12px; padding:15px; margin-bottom:15px; border:1px solid var(--border);">
+                <h3 style="font-size:1rem; margin-bottom:10px;"><i class="fab fa-github"></i> GitHub 同步</h3>
                 <input type="password" id="ghTokenInput" class="input-field" placeholder="GitHub Token" onchange="saveSettings()">
-                <input type="text" id="gistIdInput" class="input-field" placeholder="Gist ID (自动生成)" onchange="saveSettings()">
+                <input type="text" id="gistIdInput" class="input-field" placeholder="Gist ID" onchange="saveSettings()">
                 <div style="display:flex; gap:10px;">
                     <button class="input-field" onclick="syncToCloud()" style="background:var(--primary); color:white; border:none;">上传</button>
                     <button class="input-field" onclick="syncFromCloud()" style="background:var(--bg-color);">下载</button>
                 </div>
             </div>
 
-            <!-- Others -->
-            <div style="background:white; border-radius:12px; padding:15px; border:1px solid var(--border);">
+            <!-- Advanced -->
+            <div style="background:var(--card-bg); border-radius:12px; padding:15px; border:1px solid var(--border);">
                 <h3 style="font-size:1rem; margin-bottom:10px;">高级</h3>
                 <input type="password" id="apiKeyInput" class="input-field" placeholder="AI API Key" onchange="saveSettings()">
-                <button class="input-field" onclick="clearAllData()" style="color:var(--danger); border-color:var(--danger); text-align:center;">清空所有数据</button>
+                <button class="input-field" onclick="clearAllData()" style="color:var(--danger); border-color:var(--danger); text-align:center;">清空数据</button>
             </div>
         </div>
     </div>
@@ -184,127 +243,169 @@
         <div class="nav-item" onclick="switchView('settings', this)"><i class="fas fa-cog"></i><span>设置</span></div>
     </div>
 
-    <!-- Modal & Toast -->
-    <div class="modal" id="editModal"><div class="modal-content"><h3>卡片</h3><input type="hidden" id="editIndex"><textarea id="inputFront" class="input-field" rows="3" placeholder="正面"></textarea><textarea id="inputBack" class="input-field" rows="3" placeholder="背面"></textarea><div style="display:flex;justify-content:flex-end;gap:10px;"><button class="input-field" style="width:auto;" onclick="closeModal()">取消</button><button class="input-field" style="width:auto;background:var(--primary);color:white;" onclick="saveCard()">保存</button></div></div></div>
+    <div class="modal" id="editModal"><div class="modal-content"><h3>卡片</h3><input type="hidden" id="editIndex"><textarea id="inputFront" class="input-field" rows="3" placeholder="正面 (**加粗**, 图片URL)"></textarea><textarea id="inputBack" class="input-field" rows="3" placeholder="背面"></textarea><div style="display:flex;justify-content:flex-end;gap:10px;"><button class="input-field" style="width:auto;" onclick="closeModal()">取消</button><button class="input-field" style="width:auto;background:var(--primary);color:white;" onclick="saveCard()">保存</button></div></div></div>
     <div class="toast" id="toast"></div>
 
     <script>
-        /* === Data & State === */
         const App = {
             data: { words: [], user: { xp: 0, level: 1, streak: 0, lastLogin: null, history: {} } },
-            state: { currentIdx: 0, queue: [], mode: 'practice', combo: 0,
-                     apiKey: localStorage.getItem('mem_apikey') || '',
-                     ghToken: localStorage.getItem('mem_gh_token') || '',
-                     gistId: localStorage.getItem('mem_gist_id') || '' }
+            state: { 
+                currentIdx: 0, queue: [], mode: 'practice', combo: 0, 
+                apiKey: localStorage.getItem('mem_apikey') || '',
+                ghToken: localStorage.getItem('mem_gh_token') || '',
+                gistId: localStorage.getItem('mem_gist_id') || '',
+                isDark: localStorage.getItem('mem_dark') === 'true',
+                isMuted: localStorage.getItem('mem_muted') === 'true',
+                isQuiz: false, quizAnswerIdx: -1
+            }
         };
-        const XP_TABLE = [0,100,300,600,1000,1500,2200,3000,4000];
+        
+        // 提示音 (频率 Throttle)
+        let lastReminderTime = 0;
+
+        // AudioContext 懒加载 (解决浏览器自动播放策略)
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        // 监听页面点击，激活音频环境
+        document.addEventListener('click', initAudio, {once:true});
 
         window.onload = () => {
             loadData();
+            toggleDarkMode(App.state.isDark);
+            document.getElementById('darkModeToggle').checked = App.state.isDark;
+            document.getElementById('muteModeToggle').checked = App.state.isMuted;
+            
             if("Notification" in window && Notification.permission!=="granted") Notification.requestPermission();
-
-            tryAutoLoadTxt(); // 自动读取 c.txt (仅在服务器环境有效)
-
-            checkDailyStreak(); renderStats(); updateList();
-
+            
+            tryAutoLoadTxt(); checkDailyStreak(); renderStats(); updateList();
+            
             document.getElementById('ghTokenInput').value = App.state.ghToken;
             document.getElementById('gistIdInput').value = App.state.gistId;
+            document.getElementById('apiKeyInput').value = App.state.apiKey;
 
-            if(App.data.words.length===0) App.data.words.push({front:"Welcome",back:"请导入数据或添加卡片",nextReview:0,interval:0,repetitions:0,easeFactor:2.5});
+            if(App.data.words.length===0) App.data.words.push({front:"Welcome",back:"答案在此",nextReview:0,interval:0,repetitions:0,easeFactor:2.5});
             startPractice();
+            
+            // 启动定时检查 (每分钟)
+            setInterval(checkDue, 60000);
         };
 
-        /* === File Parsing Logic === */
-        function parseAndMergeTxt(text) {
-            const lines = text.split(/\r?\n/);
-            let addedCount = 0;
-            lines.forEach(line => {
-                if (!line.trim()) return;
-                const parts = line.split('\t');
-                const front = parts[0].trim();
-                const back = parts[1] ? parts[1].trim() : '';
-                const exists = App.data.words.some(w => w.front === front);
-                if (!exists && front) {
-                    App.data.words.push({front, back, nextReview:0, interval:0, repetitions:0, easeFactor:2.5, aiNote:''});
-                    addedCount++;
-                }
+        /* === Sound & Mute Logic === */
+        function toggleMuteMode(isMuted) {
+            App.state.isMuted = isMuted;
+            localStorage.setItem('mem_muted', isMuted);
+            if(isMuted && audioCtx) audioCtx.suspend();
+        }
+
+        function playSound(type) {
+            if (App.state.isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+
+            if(type === 'success') {
+                osc.type = 'sine'; osc.frequency.value = 600;
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'fail') {
+                osc.type = 'sawtooth'; osc.frequency.value = 150;
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'reminder') {
+                // 双声提示音 "叮叮"
+                const now = audioCtx.currentTime;
+                const osc2 = audioCtx.createOscillator();
+                const g2 = audioCtx.createGain();
+                osc2.connect(g2); g2.connect(audioCtx.destination);
+                
+                osc.frequency.setValueAtTime(800, now);
+                osc2.frequency.setValueAtTime(1200, now + 0.1);
+                
+                g.gain.setValueAtTime(0.1, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                
+                g2.gain.setValueAtTime(0.1, now + 0.1);
+                g2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+                osc.start(now); osc.stop(now + 0.1);
+                osc2.start(now + 0.1); osc2.stop(now + 0.2);
+            }
+        }
+
+        function speak(e, s) {
+            e.stopPropagation();
+            if (App.state.isMuted) return; // 静音模式下禁用 TTS
+            const txt = document.getElementById(s==='front'?'cardFront':'cardBack').innerText;
+            speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
+        }
+
+        /* === Quiz Mode === */
+        function toggleQuizMode() {
+            if(App.data.words.length < 4) return showToast("需至少4个单词");
+            App.state.isQuiz = !App.state.isQuiz;
+            const btn = document.getElementById('modeToggleBtn');
+            const cardUI = document.getElementById('cardModeUI');
+            const quizUI = document.getElementById('quizModeUI');
+            const stdCtrls = document.getElementById('stdControls');
+            const quizCtrls = document.getElementById('quizControls');
+
+            if(App.state.isQuiz) {
+                btn.classList.add('active'); cardUI.style.display='none'; quizUI.style.display='flex'; stdCtrls.style.display='none'; quizCtrls.style.display='flex';
+                renderQuiz(); showToast("🎮 测验模式");
+            } else {
+                btn.classList.remove('active'); cardUI.style.display='flex'; quizUI.style.display='none'; stdCtrls.style.display='flex'; quizCtrls.style.display='none';
+                renderCard();
+            }
+        }
+
+        function renderQuiz() {
+            const idx = App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx;
+            const target = App.data.words[idx];
+            document.getElementById('quizQuestion').innerHTML = parseContent(target.front);
+            const options = [{text: target.back, isCorrect: true}];
+            const indices = [];
+            while(indices.length < 3) {
+                const rand = Math.floor(Math.random() * App.data.words.length);
+                if(rand !== idx && !indices.includes(rand)) { indices.push(rand); options.push({text: App.data.words[rand].back, isCorrect: false}); }
+            }
+            for (let i=options.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [options[i],options[j]]=[options[j],options[i]]; }
+            const container = document.getElementById('quizOptions'); container.innerHTML = '';
+            options.forEach((opt, i) => {
+                if(opt.isCorrect) App.state.quizAnswerIdx = i;
+                const btn = document.createElement('div'); btn.className = 'quiz-btn'; btn.innerHTML = parseContent(opt.text);
+                btn.onclick = () => handleQuizAnswer(i, btn); container.appendChild(btn);
             });
-            return addedCount;
         }
 
-        async function tryAutoLoadTxt() {
-            try {
-                const res = await fetch('c.txt');
-                if (res.ok) {
-                    const text = await res.text();
-                    const count = parseAndMergeTxt(text);
-                    if (count > 0) { showToast(`自动同步: 新增 ${count} 个单词`); saveData(); updateList(); }
-                }
-            } catch (e) { console.log("Local c.txt load skipped"); }
+        function handleQuizAnswer(sIdx, btn) {
+            document.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+            if (sIdx === App.state.quizAnswerIdx) {
+                btn.classList.add('correct'); playSound('success'); handleResult(5, true);
+                setTimeout(() => { if(App.state.isQuiz) renderQuiz(); }, 600);
+            } else {
+                btn.classList.add('wrong'); document.querySelectorAll('.quiz-btn')[App.state.quizAnswerIdx].classList.add('correct');
+                playSound('fail'); handleResult(0, true);
+                setTimeout(() => { if(App.state.isQuiz) renderQuiz(); }, 1500);
+            }
         }
 
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result;
-                if (file.name.endsWith('.json')) {
-                    try { App.data = JSON.parse(content); saveData(); location.reload(); }
-                    catch(err) { showToast("JSON格式错误"); }
-                } else {
-                    const count = parseAndMergeTxt(content);
-                    if (count > 0) {
-                        showToast(`导入 ${count} 条数据`); saveData(); updateList();
-                        if(App.state.currentIdx >= App.data.words.length) App.state.currentIdx=0;
-                        renderCard();
-                    } else { showToast("无新数据或格式不对"); }
-                }
-            };
-            reader.readAsText(file);
-            input.value = ''; // Reset input
-        }
-
-        /* === Gist Sync === */
-        async function syncToCloud() {
-            if (!App.state.ghToken) return showToast("请填写Token");
-            showToast("正在上传...", 10000);
-            try {
-                const body = JSON.stringify({ "description": "MemoryPro Data", "public": false, "files": { "memorypro_data.json": { "content": JSON.stringify(App.data) } } });
-                let url = 'https://api.github.com/gists'; let method = 'POST';
-                if (App.state.gistId) { url += `/${App.state.gistId}`; method = 'PATCH'; }
-
-                const res = await fetch(url, { method: method, headers: { "Authorization": `token ${App.state.ghToken}`, "Accept": "application/vnd.github.v3+json" }, body: body });
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.message || "Status " + res.status);
-                }
-                const json = await res.json();
-                if (!App.state.gistId) { App.state.gistId = json.id; localStorage.setItem('mem_gist_id', json.id); document.getElementById('gistIdInput').value = json.id; }
-                showToast("✅ 上传成功");
-            } catch (e) { showToast("❌ 失败: " + e.message); }
-        }
-
-        async function syncFromCloud() {
-            if (!App.state.ghToken || !App.state.gistId) return showToast("需Token和GistID");
-            showToast("正在拉取...", 5000);
-            try {
-                const res = await fetch(`https://api.github.com/gists/${App.state.gistId}`, { headers: { "Authorization": `token ${App.state.ghToken}` } });
-                if (!res.ok) throw new Error("Status " + res.status);
-                const json = await res.json();
-                if (json.files && json.files["memorypro_data.json"]) {
-                    if(confirm("覆盖本地数据?")) { App.data = JSON.parse(json.files["memorypro_data.json"].content); saveData(); location.reload(); }
-                } else showToast("未找到数据文件");
-            } catch (e) { showToast("❌ 失败: " + e.message); }
-        }
-
-        /* === SM-2 Logic === */
-        function handleResult(q) {
+        /* === Core Logic === */
+        function toggleDarkMode(isDark) { App.state.isDark=isDark; localStorage.setItem('mem_dark',isDark); if(isDark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme'); }
+        function parseContent(t) { if(!t)return''; let h=t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); h=h.replace(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/gi,'<img src="$1" />'); return h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'); }
+        function parseAndMergeTxt(t) { const l=t.split(/\r?\n/); let c=0; l.forEach(x=>{if(!x.trim())return;const p=x.split('\t');const f=p[0].trim();if(f&&!App.data.words.some(w=>w.front===f)){App.data.words.push({front:f,back:p[1]?p[1].trim():'',nextReview:0,interval:0,repetitions:0,easeFactor:2.5,aiNote:''});c++;}}); return c; }
+        async function tryAutoLoadTxt() { try{const r=await fetch('c.txt');if(r.ok){const c=parseAndMergeTxt(await r.text());if(c>0){showToast(`新词+${c}`);saveData();updateList();}}}catch(e){} }
+        
+        /* SM-2 & Main */
+        function handleResult(q, skipRender=false) {
             if(App.data.words.length===0) return;
             const idx = App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx;
             const item = App.data.words[idx];
-
-            // SM-2 Algo
             if(!item.ef) item.ef=2.5; if(!item.int) item.int=0; if(!item.rep) item.rep=0;
             if(q===0){ item.rep=0; item.int=0; }
             else {
@@ -312,90 +413,72 @@
                 if(item.rep===0) item.int=1; else if(item.rep===1) item.int=6; else item.int=Math.ceil(item.int*item.ef);
                 item.rep++;
             }
-
             const now = Date.now();
-            if(q===0) { item.nextReview = now + 300000; showToast("😭 稍后重来"); addXP(5); App.state.combo=0; }
-            else { item.nextReview = now + item.int*86400000; showToast(q===5?"😎 秒杀":"🤔 记住了"); addXP(q===5?20:10); triggerCombo(); }
-
-            const t = new Date().toISOString().split('T')[0];
-            App.data.user.history[t] = (App.data.user.history[t]||0)+1;
+            if(q===0) { item.nextReview = now + 300000; if(!skipRender) {showToast("😭 稍后重来"); playSound('fail');} addXP(5); App.state.combo=0; }
+            else { item.nextReview = now + item.int*86400000; if(!skipRender) {showToast(q===5?"😎 秒杀":"🤔 记住了"); playSound('success');} addXP(q===5?20:10); triggerCombo(); }
+            
+            const t = new Date().toISOString().split('T')[0]; App.data.user.history[t] = (App.data.user.history[t]||0)+1;
             saveData(); renderStats();
-
+            
             if(App.state.mode==='review') {
                 App.state.queue.shift();
-                if(App.state.queue.length===0) { showToast("🎉 复习完成"); startPractice(); } else renderCard();
-            } else nextRandomCard();
+                if(App.state.queue.length===0) { showToast("🎉 复习完成"); startPractice(); } 
+                else if(!skipRender) { App.state.isQuiz ? renderQuiz() : renderCard(); }
+            } else nextRandomCard(skipRender);
             checkDue(); updateList();
         }
-
+        
         function startReview() {
             const now=Date.now();
             const due=App.data.words.map((w,i)=>({...w,i})).filter(w=>w.nextReview<now && w.int>0).map(w=>w.i);
             const forgot=App.data.words.map((w,i)=>({...w,i})).filter(w=>w.int===0 && w.nextReview<now && w.nextReview>0).map(w=>w.i);
             const q=[...new Set([...due,...forgot])];
             if(q.length===0) return showToast("暂无到期");
-            App.state.queue=q; App.state.mode='review'; renderCard();
+            App.state.queue=q; App.state.mode='review'; 
+            App.state.isQuiz ? renderQuiz() : renderCard();
         }
-
-        /* === View & Utils === */
-        function renderCard() {
-            const idx = App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx;
-            const item = App.data.words[idx];
-            if(!item) return;
-            document.getElementById('cardFront').textContent=item.front;
-            document.getElementById('cardBack').textContent=item.back||"";
-            document.getElementById('aiResult').textContent=item.aiNote||"";
-            document.querySelector('.flashcard').classList.remove('flipped');
-            document.getElementById('cardFront').className = item.front.length>50?'card-text text-long':'card-text';
-        }
-        function renderStats() {
-            const t = new Date().toISOString().split('T')[0];
-            document.getElementById('userLevel').textContent=App.data.user.level;
-            document.getElementById('userStreak').textContent=App.data.user.streak;
-            document.getElementById('currentXP').textContent=App.data.user.xp;
-            document.getElementById('todayCount').textContent=App.data.user.history[t]||0;
-            const next=XP_TABLE[App.data.user.level]||App.data.user.level*1000;
-            document.getElementById('nextLevelXP').textContent=next;
-            document.getElementById('xpBar').style.width=((App.data.user.xp/next)*100)+'%';
-            checkDue();
-        }
+        
+        function renderCard() { const i=App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx; const w=App.data.words[i]; if(!w)return; document.getElementById('cardFront').innerHTML=parseContent(w.front); document.getElementById('cardBack').innerHTML=parseContent(w.back||""); document.getElementById('aiResult').textContent=w.aiNote||""; document.querySelector('.flashcard').classList.remove('flipped'); document.getElementById('cardFront').className=w.front.length>50?'card-text text-long':'card-text'; }
+        function nextRandomCard(skip=false) { App.state.currentIdx=Math.floor(Math.random()*App.data.words.length); if(!skip) App.state.isQuiz?renderQuiz():renderCard(); }
         function checkDue() {
             const c=App.data.words.filter(w=>w.nextReview<Date.now() && w.nextReview>0).length;
             const b=document.getElementById('reviewBanner');
-            if(c>0) { b.style.display='block'; document.getElementById('dueCount').textContent=c; } else b.style.display='none';
-        }
-        function updateList(f=''){
-            const c=document.getElementById('wordListContainer'); c.innerHTML='';
-            App.data.words.forEach((w,i)=>{
-                if(f && !w.front.includes(f)) return;
-                const d=document.createElement('div'); d.className='list-item';
-                d.innerHTML=`<div class="item-content" onclick="jump(${i})"><div class="item-front">${w.front}</div><div style="color:#666;font-size:0.8rem">${w.back}</div></div><div class="item-actions"><i class="fas fa-trash" style="color:red" onclick="del(${i})"></i></div>`;
-                c.appendChild(d);
-            });
+            if(c>0){
+                b.style.display='block'; document.getElementById('dueCount').textContent=c;
+                // 播放提示音逻辑：每10分钟最多响一次，且必须是非静音模式
+                if(Date.now() - lastReminderTime > 600000) {
+                    playSound('reminder');
+                    lastReminderTime = Date.now();
+                }
+            } else b.style.display='none';
         }
 
+        /* Utils */
         function addXP(n){ App.data.user.xp+=n; const next=XP_TABLE[App.data.user.level]||App.data.user.level*1000; if(App.data.user.xp>=next){App.data.user.level++;showToast("升级啦!");confetti();} }
         function triggerCombo(){ App.state.combo++; if(App.state.combo>1){const e=document.getElementById('comboText');e.textContent=`COMBO x${App.state.combo}`;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),800);} }
         function checkDailyStreak(){ const t=new Date().toISOString().split('T')[0]; if(App.data.user.lastLogin!==t){ const y=new Date(Date.now()-86400000).toISOString().split('T')[0]; App.data.user.streak=(App.data.user.lastLogin===y)?App.data.user.streak+1:1; App.data.user.lastLogin=t; saveData(); } }
-
+        function renderStats(){ const t=new Date().toISOString().split('T')[0]; document.getElementById('userLevel').textContent=App.data.user.level; document.getElementById('userStreak').textContent=App.data.user.streak; document.getElementById('currentXP').textContent=App.data.user.xp; document.getElementById('todayCount').textContent=App.data.user.history[t]||0; const next=XP_TABLE[App.data.user.level]||App.data.user.level*1000; document.getElementById('nextLevelXP').textContent=next; document.getElementById('xpBar').style.width=((App.data.user.xp/next)*100)+'%'; checkDue(); }
+        function importData(el){ const f=el.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{if(f.name.endsWith('.json')){try{App.data=JSON.parse(e.target.result);saveData();location.reload();}catch(e){showToast("Err");}}else{const c=parseAndMergeTxt(e.target.result);if(c>0){showToast(`+${c}`);saveData();updateList();renderCard();}else showToast("无新词");}}; r.readAsText(f); el.value=''; }
+        function updateList(f=''){ const c=document.getElementById('wordListContainer'); c.innerHTML=''; App.data.words.forEach((w,i)=>{ if(f&&!w.front.includes(f))return; const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div class="item-content" onclick="jump(${i})"><div class="item-front">${parseContent(w.front)}</div><div style="color:var(--text-sub);font-size:0.8rem">${parseContent(w.back)}</div></div><div class="item-actions"><i class="fas fa-trash" style="color:red" onclick="del(${i})"></i></div>`; c.appendChild(d); }); }
+        function jump(i){ App.state.currentIdx=i; App.state.mode='practice'; switchView('home',document.querySelector('.nav-item')); App.state.isQuiz?renderQuiz():renderCard(); }
+        function del(i){ if(confirm('Del?')){App.data.words.splice(i,1);saveData();updateList();renderCard();} }
+        function switchView(v,e){ document.querySelectorAll('.view-section').forEach(x=>x.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); if(e){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));e.classList.add('active');} }
+        function flipCard(){ document.querySelector('.flashcard').classList.toggle('flipped'); }
+        function startPractice(){ App.state.mode='practice'; nextRandomCard(); }
+        function closeModal(){ document.getElementById('editModal').style.display='none'; }
+        function openAddModal(){ document.getElementById('editIndex').value=''; document.getElementById('inputFront').value=''; document.getElementById('inputBack').value=''; document.getElementById('editModal').style.display='flex'; }
+        function saveCard(){ const f=document.getElementById('inputFront').value, b=document.getElementById('inputBack').value; App.data.words.push({front:f,back:b,int:0,rep:0,ef:2.5,nextReview:0}); saveData(); closeModal(); updateList(); renderCard(); }
+        
+        async function syncToCloud() { if(!App.state.ghToken)return showToast("缺Token"); showToast("上传...",8000); try{const b=JSON.stringify({"description":"MP","public":false,"files":{"mp_data.json":{"content":JSON.stringify(App.data)}}}); let u='https://api.github.com/gists',m='POST'; if(App.state.gistId){u+=`/${App.state.gistId}`;m='PATCH';} const r=await fetch(u,{method:m,headers:{"Authorization":`token ${App.state.ghToken}`},body:b}); if(!r.ok)throw new Error(); const j=await r.json(); if(!App.state.gistId){App.state.gistId=j.id;localStorage.setItem('mem_gist_id',j.id);document.getElementById('gistIdInput').value=j.id;} showToast("✅");}catch(e){showToast("❌");} }
+        async function syncFromCloud() { if(!App.state.ghToken||!App.state.gistId)return showToast("缺信息"); showToast("下载...",5000); try{const r=await fetch(`https://api.github.com/gists/${App.state.gistId}`,{headers:{"Authorization":`token ${App.state.ghToken}`}}); const j=await r.json(); if(j.files&&j.files["mp_data.json"]){if(confirm("覆盖?")){App.data=JSON.parse(j.files["mp_data.json"].content);saveData();location.reload();}}else showToast("无数据");}catch(e){showToast("❌");} }
+        async function callAI() { if(!App.state.apiKey)return showToast("请配API"); const i=App.data.words[App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx]; document.getElementById('aiResult').innerHTML='...'; try{const r=await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${App.state.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model:"glm-4-flash",messages:[{role:"user",content:"分析:"+i.front}]})}); const d=await r.json(); i.aiNote=d.choices[0].message.content; document.getElementById('aiResult').textContent=i.aiNote; saveData();}catch(e){document.getElementById('aiResult').textContent="Err";} }
+        
         function saveSettings(){ App.state.apiKey=document.getElementById('apiKeyInput').value; App.state.ghToken=document.getElementById('ghTokenInput').value; App.state.gistId=document.getElementById('gistIdInput').value; localStorage.setItem('mem_apikey',App.state.apiKey); localStorage.setItem('mem_gh_token',App.state.ghToken); localStorage.setItem('mem_gist_id',App.state.gistId); }
-        function saveData(){ localStorage.setItem('mem_pro_data', JSON.stringify(App.data)); }
+        function saveData(){ localStorage.setItem('mem_pro_data',JSON.stringify(App.data)); }
         function loadData(){ const d=localStorage.getItem('mem_pro_data'); if(d)App.data=JSON.parse(d); if(!App.data.user.history)App.data.user.history={}; }
-        function showToast(m,t=2000){ const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),t); }
-
-        function jump(i){App.state.currentIdx=i;App.state.mode='practice';switchView('home',document.querySelector('.nav-item'));renderCard();}
-        function del(i){if(confirm('删除?')){App.data.words.splice(i,1);saveData();updateList();renderCard();}}
-        function switchView(v,e){document.querySelectorAll('.view-section').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');if(e){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));e.classList.add('active');}}
-        function flipCard(){document.querySelector('.flashcard').classList.toggle('flipped');}
-        function nextRandomCard(){App.state.currentIdx=Math.floor(Math.random()*App.data.words.length);renderCard();}
-        function startPractice(){App.state.mode='practice';nextRandomCard();}
-        function closeModal(){document.getElementById('editModal').style.display='none';}
-        function openAddModal(){document.getElementById('editIndex').value='';document.getElementById('inputFront').value='';document.getElementById('inputBack').value='';document.getElementById('editModal').style.display='flex';}
-        function saveCard(){const f=document.getElementById('inputFront').value,b=document.getElementById('inputBack').value;App.data.words.push({front:f,back:b,int:0,rep:0,ef:2.5,nextReview:0});saveData();closeModal();updateList();renderCard();}
-        async function callAI(){if(!App.state.apiKey)return showToast("请配置API Key");const item=App.data.words[App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx];document.getElementById('aiResult').innerHTML='<i class="fas fa-spinner fa-spin"></i>';try{const r=await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${App.state.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model:"glm-4-flash",messages:[{role:"user",content:"分析:"+item.front}]})});const d=await r.json();item.aiNote=d.choices[0].message.content;document.getElementById('aiResult').textContent=item.aiNote;saveData();}catch(e){document.getElementById('aiResult').textContent="Err";}}
-        function speak(e,s){e.stopPropagation();speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById(s==='front'?'cardFront':'cardBack').textContent));}
-        function exportData(){const a=document.createElement('a');a.href='data:json;charset=utf-8,'+encodeURIComponent(JSON.stringify(App.data));a.download='mempro_backup.json';a.click();}
-        function clearAllData(){if(confirm('清空?')){localStorage.removeItem('mem_pro_data');location.reload();}}
+        function showToast(m,t=2000){ const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),t); }
+        function exportData(){ const a=document.createElement('a');a.href='data:json;charset=utf-8,'+encodeURIComponent(JSON.stringify(App.data));a.download='mempro.json';a.click(); }
+        function clearAllData(){ if(confirm('清空?')){localStorage.removeItem('mem_pro_data');location.reload();} }
     </script>
 </body>
 </html>
