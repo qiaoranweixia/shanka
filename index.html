@@ -387,14 +387,61 @@
         
         // 优化：自动读取逻辑
         function parseAndMergeTxt(t) { const l=t.split(/\r?\n/); let c=0; l.forEach(x=>{if(!x.trim())return;const p=x.split('\t');const f=p[0].trim();if(f&&!App.data.words.some(w=>w.front===f)){App.data.words.push({front:f,back:p[1]?p[1].trim():'',nextReview:0,interval:0,repetitions:0,easeFactor:2.5,aiNote:''});c++;}}); return c; }
-        async function tryAutoLoadTxt() { 
-            if(window.location.protocol === 'file:') return console.log("Local file protocol detected, skipping auto-load.");
-            try{
-                const r=await fetch('c.txt?t='+Date.now()); // Prevent caching
-                if(r.ok){const c=parseAndMergeTxt(await r.text());if(c>0){showToast(`自动导入 +${c}`);saveData();updateList();}}
-            }catch(e){} 
-        }
+       /* === 强力诊断版自动读取函数 === */
+        async function tryAutoLoadTxt() {
+            // 1. 检查是不是在本地双击打开的
+            if (window.location.protocol === 'file:') {
+                alert("❌ 错误：请不要直接双击 HTML 打开！\n自动读取功能必须在 GitHub/Cloudflare 网页上才能生效。");
+                return;
+            }
 
+            try {
+                // 2. 开始尝试读取，并在控制台打印路径
+                console.log("正在尝试读取: " + window.location.href.replace('index.html','') + 'c.txt');
+                
+                // 添加时间戳 ?t=... 强制清除缓存
+                const res = await fetch('c.txt?t=' + new Date().getTime());
+
+                // 3. 检查 HTTP 状态码
+                if (res.status === 404) {
+                    // 这里的 Toast 改成了 Alert，确保你能看到
+                    alert("❌ 读取失败：找不到 c.txt 文件 (404)。\n\n请检查：\n1. 文件名必须是小写 c.txt\n2. 文件必须和 index.html 在同一目录\n3. 即使改对了，GitHub 部署可能需要等1-2分钟");
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert("❌ 网络错误：状态码 " + res.status);
+                    return;
+                }
+
+                // 4. 读取成功，开始解析
+                const text = await res.text();
+                console.log("c.txt 内容预览:", text.substring(0, 50)); // 在控制台看有没有读到内容
+
+                const count = parseAndMergeTxt(text);
+                
+                if (count > 0) {
+                    // 成功！
+                    showToast(`✅ 成功同步 c.txt！新增 ${count} 个单词`);
+                    saveData();
+                    updateList();
+                    // 刷新显示
+                    if(App.state.currentIdx >= App.data.words.length) {
+                        App.state.currentIdx = 0;
+                        if(!App.state.isQuiz) renderCard();
+                    }
+                } else {
+                    // 文件存在，但是没有新内容
+                    // 可能是内容都已存在，或者是格式不对
+                    console.log("文件读取成功，但 parseAndMergeTxt 返回 0");
+                    // 如果你觉得没读出来，取消下面这行的注释看看原因
+                    // alert("⚠️ c.txt 读取成功，但没有新增单词。\n可能原因：\n1. 所有单词已存在\n2. 没用 Tab 键分隔\n3. 文件是空的");
+                }
+
+            } catch (e) {
+                alert("❌ 发生未知错误: " + e.message);
+            }
+        }
         function handleResult(q, skipRender=false) {
             if(App.data.words.length===0) return;
             const idx = App.state.mode==='review'?App.state.queue[0]:App.state.currentIdx;
